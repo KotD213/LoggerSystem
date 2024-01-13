@@ -1,0 +1,112 @@
+import java.util.ArrayList;
+import java.util.List;
+
+enum AccessType {
+    OWNER, ADMIN, BASIC
+}
+
+class Log {
+    private long timestamp;
+    private String creator;
+    private String logText;
+    private String logType;
+
+    public Log(String creator, String logText, String logType) {
+        this.timestamp = System.currentTimeMillis();
+        this.creator = creator;
+        this.logText = logText;
+        this.logType = logType;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public String getLogText() {
+        return logText;
+    }
+
+    public String getLogType() {
+        return logType;
+    }
+}
+
+class LoggerSystem {
+    private List<Log> allLogs;
+    private List<Log> deletedLogs;
+
+    public LoggerSystem() {
+        this.allLogs = new ArrayList<>();
+        this.deletedLogs = new ArrayList<>();
+    }
+
+    public void createLog(String creator, String logText, String logType, AccessType accessType) {
+        if (hasAccess(accessType)) {
+            Log newLog = new Log(creator, logText, logType);
+            allLogs.add(newLog);
+            System.out.println("Log created successfully by " + creator);
+        } else {
+            System.out.println("Access denied. You do not have the required permissions to create a log.");
+        }
+    }
+
+    public void deleteLog(Log log, AccessType accessType) {
+        if (hasAccess(accessType)) {
+            allLogs.remove(log);
+            deletedLogs.add(log);
+            System.out.println("Log deleted successfully by " + accessType.name());
+        } else {
+            System.out.println("Access denied. You do not have the required permissions to delete a log.");
+        }
+    }
+
+    private boolean hasAccess(AccessType accessType) {
+        switch (accessType) {
+            case OWNER:
+                return true;
+            case ADMIN:
+                return true;
+            case BASIC:
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    public List<Log> getAllLogs() {
+        return allLogs;
+    }
+
+    public List<Log> getDeletedLogs() {
+        return deletedLogs;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        LoggerSystem loggerSystem = new LoggerSystem();
+
+        // Example usage
+        loggerSystem.createLog("Owner", "This is an owner log", "Info", AccessType.OWNER);
+        loggerSystem.createLog("Admin", "This is an admin log", "Warning", AccessType.ADMIN);
+        loggerSystem.createLog("Basic", "This is a basic log", "Error", AccessType.BASIC);
+
+        List<Log> allLogs = loggerSystem.getAllLogs();
+        System.out.println("All Logs:");
+        for (Log log : allLogs) {
+            System.out.println(log.getCreator() + ": " + log.getLogText());
+        }
+
+        loggerSystem.deleteLog(allLogs.get(0), AccessType.OWNER);
+
+        List<Log> deletedLogs = loggerSystem.getDeletedLogs();
+        System.out.println("\nDeleted Logs:");
+        for (Log log : deletedLogs) {
+            System.out.println(log.getCreator() + ": " + log.getLogText());
+        }
+    }
+}
